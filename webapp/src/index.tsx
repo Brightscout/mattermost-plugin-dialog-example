@@ -1,6 +1,10 @@
-import {Store, Action} from 'redux';
+import {Store} from 'redux';
 
 import {GlobalState} from 'mattermost-redux/types/store';
+
+import Actions from 'actions';
+import Modal from 'components/modal';
+import reducer from 'reducers';
 
 import manifest from './manifest';
 
@@ -8,9 +12,14 @@ import manifest from './manifest';
 import {PluginRegistry} from './types/mattermost-webapp';
 
 export default class Plugin {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-    public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
-        // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
+    // @see https://developers.mattermost.com/extend/plugins/webapp/reference/
+    public async initialize(registry: PluginRegistry, store: Store<GlobalState, any>) {
+        registry.registerReducer(reducer);
+        registry.registerRootComponent(Modal);
+        registry.registerWebSocketEventHandler(
+            `custom_${manifest.id}_open_modal`,
+            (event) => store.dispatch(Actions.openModal(event.data)),
+        );
     }
 }
 
